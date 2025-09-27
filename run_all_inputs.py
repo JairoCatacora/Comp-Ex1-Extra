@@ -21,7 +21,7 @@ input_dir = "inputs"
 output_dir = "outputs"
 os.makedirs(output_dir, exist_ok=True)
 
-for i in range(1, 11):
+for i in range(1, 3):
     filename = f"input{i}.txt"
     filepath = os.path.join(input_dir, filename)
 
@@ -29,6 +29,10 @@ for i in range(1, 11):
         print(f"Ejecutando {filename}")
         run_cmd = ["./a.out", filepath]
         result = subprocess.run(run_cmd, capture_output=True, text=True)
+
+        print(result.stdout)
+        if result.stderr:
+            print("Error:", result.stderr)
 
         # Guardar stdout y stderr
         output_file = os.path.join(output_dir, f"output{i}.txt")

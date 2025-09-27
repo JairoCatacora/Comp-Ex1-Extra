@@ -1,10 +1,19 @@
 Scanner
 
+TOKEN(PRINT, "print")
+TOKEN(LPAREN, "(")
+TOKEN(LKEY, "{")
+TOKEN(NUM, "1")
+TOKEN(COMA, ",")
 TOKEN(NUM, "2")
-TOKEN(PLUS, "+")
-TOKEN(NUM, "5")
-TOKEN(PLUS, "+")
+TOKEN(RKEY, "}")
+TOKEN(UNION, "cup")
+TOKEN(LKEY, "{")
+TOKEN(NUM, "2")
+TOKEN(COMA, ",")
 TOKEN(NUM, "3")
+TOKEN(RKEY, "}")
+TOKEN(RPAREN, ")")
 TOKEN(END)
 
 Scanner exitoso

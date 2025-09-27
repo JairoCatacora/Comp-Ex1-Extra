@@ -5,6 +5,8 @@
 
 using namespace std;
 
+PType::~PType() {}
+
 // ------------------ Exp ------------------
 Exp::~Exp() {}
 
@@ -46,11 +48,11 @@ SqrtExp::~SqrtExp() {}
 Program::Program(){}
 Program::~Program(){}
 Stm::~Stm(){}
-PrintStm::PrintStm(Exp* e1){
+PrintStm::PrintStm(PType* e1){
     e=e1;
 }
 PrintStm::~PrintStm(){}
-AssignStm::AssignStm(string id1, Exp* rhs1){
+AssignStm::AssignStm(string id1, PType* rhs1){
     id = id1;
     rhs=rhs1;
 }
@@ -62,3 +64,13 @@ IdExp::IdExp(string v) {
 IdExp::~IdExp() {
 }
 
+Set::~Set() {}
+
+BinarySetExp::BinarySetExp(Set* s1, Set* s2, SetOp op): s1(s1), s2(s2), op(op) {}
+BinarySetExp::~BinarySetExp() {}
+
+SetExp::SetExp(list<Set*> el, list<Exp*> ex): el(el), ex(ex) {}
+SetExp::~SetExp() {}
+
+IdSet::IdSet(string v) : value(v) {}
+IdSet::~IdSet() {}

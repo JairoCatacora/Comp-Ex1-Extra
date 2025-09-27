@@ -3,7 +3,8 @@
 #include <cmath>
 #include "ast.h"
 #include "visitor.h"
-
+#include <algorithm>
+#include <set>
 
 using namespace std;
 unordered_map<std::string, int> memoria;
@@ -34,6 +35,30 @@ int AssignStm::accept(Visitor* visitor) {
 
 int PrintStm::accept(Visitor* visitor) {
     return visitor->visit(this);
+}
+
+int SetExp::accept(Visitor* visitor) {
+    return 0;
+}
+
+int BinarySetExp::accept(Visitor* visitor) {
+    return 0;
+}
+
+int IdSet::accept(Visitor* visitor) {
+    return 0;
+}
+
+list<int> SetExp::acceptSet(Visitor* visitor) {
+    return visitor->visitSet(this);
+}
+
+list<int> BinarySetExp::acceptSet(Visitor* visitor) {
+    return visitor->visitSet(this);
+}
+
+list<int> IdSet::acceptSet(Visitor* visitor) {
+    return visitor->visitSet(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -109,6 +134,48 @@ int EVALVisitor::visit(SqrtExp* exp) {
     return floor(sqrt( exp->value->accept(this)));
 }
 
+list<int> EVALVisitor::visitSet(SetExp* exp) {
+    list<int> result;
+    
+    for (auto e : exp->ex) {
+        int val = e->accept(this);
+        result.push_back(val);
+    }
+    return result;
+}
+
+list<int> EVALVisitor::visitSet(BinarySetExp* exp) {
+    list<int> set1 = exp->s1->acceptSet(this);
+    list<int> set2 = exp->s2->acceptSet(this);
+    set<int> result;
+    
+    switch (exp->op) {
+        case UNION_OP:
+            result.insert(set1.begin(), set1.end());
+            result.insert(set2.begin(), set2.end());
+            break;
+        case INTERSECT_OP:
+            for (int val : set1) {
+                if (find(set2.begin(), set2.end(), val) != set2.end()) {
+                    result.insert(val);
+                }
+            }
+            break;
+        case DIFFERENCE_OP:
+            for (int val : set1) {
+                if (find(set2.begin(), set2.end(), val) == set2.end()) {
+                    result.insert(val);
+                }
+            }
+            break;
+    }
+    
+    return list<int>(result.begin(), result.end());
+}
+
+list<int> EVALVisitor::visitSet(IdSet* exp) {
+    return list<int>();
+}
 
 void EVALVisitor::interprete(Program* programa){
     if (programa)
@@ -124,7 +191,21 @@ void EVALVisitor::interprete(Program* programa){
 ///////////////////////////////////////////////////////////////////////
 
 int EVALVisitor::visit(PrintStm* stm) {
-    cout << stm->e->accept(this);
+    Set* set = dynamic_cast<Set*>(stm->e);
+    if (set) {
+        list<int> result = set->acceptSet(this);
+        
+        cout << "{";
+        bool first = true;
+        for (int val : result) {
+            if (!first) cout << ",";
+            cout << val;
+            first = false;
+        }
+        cout << "}";
+    } else {
+        cout << stm->e->accept(this);
+    }
     return 0;
 }
 
@@ -150,14 +231,24 @@ int EVALVisitor::visit(Program* p) {
 
 int PrintVisitor::visit(PrintStm* stm) {
     cout << "print(";
-    stm -> e ->accept(this);
+    Set* set = dynamic_cast<Set*>(stm->e);
+    if (set) {
+        set->acceptSet(this);
+    } else {
+        stm->e->accept(this);
+    }
     cout << ")" << endl;
     return 0;
 }
 
 int PrintVisitor::visit(AssignStm* stm) {
     cout << stm->id << " = ";
-    stm->rhs->accept(this);
+    Set* set = dynamic_cast<Set*>(stm->rhs);
+    if (set) {
+        set->acceptSet(this);
+    } else {
+        stm->rhs->accept(this);
+    }
     cout << endl;
     return 0;
 }
@@ -167,4 +258,42 @@ int PrintVisitor::visit(Program* p) {
         i->accept(this);
     }
     return 0;
+}
+
+list<int> PrintVisitor::visitSet(SetExp* exp) {
+    cout << "{";
+    bool first = true;
+    
+    for (auto e : exp->ex) {
+        if (!first) cout << ",";
+        e->accept(this);
+        first = false;
+    }
+        
+    cout << "}";
+    return list<int>();
+}
+
+list<int> PrintVisitor::visitSet(BinarySetExp* exp) {
+    exp->s1->acceptSet(this);
+    switch (exp->op) {
+        case UNION_OP:
+            cout << " cup ";
+            break;
+        case INTERSECT_OP:
+            cout << " cap ";
+            break;
+        case DIFFERENCE_OP:
+            cout << " \\ ";
+            break;
+        default:
+            cout << " ? ";
+    }
+    exp->s2->acceptSet(this);
+    return list<int>();
+}
+
+list<int> PrintVisitor::visitSet(IdSet* exp) {
+    cout << exp->value;
+    return list<int>();
 }

@@ -38,6 +38,12 @@ ostream& operator<<(ostream& outs, const Token& tok) {
         case Token::ASSIGN:    outs << "TOKEN(ASSIGN, \""    << tok.text << "\")"; break;
         case Token::ERR:    outs << "TOKEN(ERR, \""    << tok.text << "\")"; break;
         case Token::END:    outs << "TOKEN(END)"; break;
+        case Token::UNION:    outs << "TOKEN(UNION, \""    << tok.text << "\")"; break;
+        case Token::INTERSECT:    outs << "TOKEN(INTERSECT, \""    << tok.text << "\")"; break;
+        case Token::DIFFERENCE:    outs << "TOKEN(DIFFERENCE, \""    << tok.text << "\")"; break;
+        case Token::LKEY:    outs << "TOKEN(LKEY, \""    << tok.text << "\")"; break;
+        case Token::RKEY:    outs << "TOKEN(RKEY, \""    << tok.text << "\")"; break;
+        case Token::COMA:    outs << "TOKEN(COMA, \""    << tok.text << "\")"; break;
     }
     return outs;
 }

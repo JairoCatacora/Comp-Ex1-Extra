@@ -24,6 +24,12 @@ public:
         SEMICOL, // ;
         PRINT,    // print
         ASSIGN,   // =
+        UNION,
+        INTERSECT,
+        DIFFERENCE,
+        LKEY,
+        RKEY,
+        COMA,
         END      // Fin de entrada
     };
 

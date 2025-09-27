@@ -1,1 +1,1 @@
-z = (3 + 5) * 2; print('z es', z)
+x = 4;y = {x,2};z = y cup {3};print(z)

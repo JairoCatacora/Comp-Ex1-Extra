@@ -19,8 +19,20 @@ enum BinaryOp {
     POW_OP
 };
 
+enum SetOp {
+    UNION_OP,
+    INTERSECT_OP,
+    DIFFERENCE_OP,
+};
+
+class PType {
+public:
+    virtual int accept(Visitor* visitor) = 0;
+    virtual ~PType() = 0;
+};
+
 // Clase abstracta Exp
-class Exp {
+class Exp : public PType {
 public:
     virtual int  accept(Visitor* visitor) = 0;
     virtual ~Exp() = 0;  // Destructor puro → clase abstracta
@@ -72,17 +84,17 @@ public:
 class AssignStm: public Stm{
 public:
     string id;
-    Exp* rhs;
+    PType* rhs;
     int accept(Visitor* visitor);
-    AssignStm(string , Exp* );
+    AssignStm(string , PType* );
     ~AssignStm();
 };
 
 class PrintStm: public Stm{
 public:
-    Exp* e;
+    PType* e;
     int accept(Visitor* visitor);
-    PrintStm(Exp*);
+    PrintStm(PType*);
     ~PrintStm();
 };
 
@@ -92,8 +104,44 @@ public:
     int accept(Visitor* visitor);
     Program();
     ~Program();
-}
-;
+};
+
+class Set : public PType {
+public:
+    virtual int accept(Visitor* visitor) = 0;
+    virtual list<int> acceptSet(Visitor* visitor) = 0;
+    virtual ~Set() = 0;
+};
+
+class BinarySetExp : public Set {
+public:
+    Set* s1;
+    Set* s2;
+    SetOp op;
+    int accept(Visitor* visitor);
+    list<int> acceptSet(Visitor* visitor);
+    BinarySetExp(Set* s1, Set* s2, SetOp op);
+    ~BinarySetExp();
+};
+
+class SetExp : public Set {
+public:
+    list<Set*> el;
+    list<Exp*> ex;
+    int accept(Visitor* visitor);
+    list<int> acceptSet(Visitor* visitor);
+    SetExp(list<Set*> el, list<Exp*> ex);
+    ~SetExp();
+};
+
+class IdSet : public Set {
+public:
+    string value;
+    int accept(Visitor* visitor);
+    list<int> acceptSet(Visitor* visitor);
+    IdSet(string v);
+    ~IdSet();
+};
 
 #endif // AST_H
 

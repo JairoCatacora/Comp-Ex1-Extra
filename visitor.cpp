@@ -8,6 +8,7 @@
 
 using namespace std;
 unordered_map<std::string, int> memoria;
+unordered_map<std::string, list<int>> set_memoria;
 ///////////////////////////////////////////////////////////////////////////////////
 int BinaryExp::accept(Visitor* visitor) {
     return visitor->visit(this);
@@ -174,7 +175,7 @@ list<int> EVALVisitor::visitSet(BinarySetExp* exp) {
 }
 
 list<int> EVALVisitor::visitSet(IdSet* exp) {
-    return list<int>();
+    return set_memoria[exp->value];
 }
 
 void EVALVisitor::interprete(Program* programa){
@@ -204,13 +205,35 @@ int EVALVisitor::visit(PrintStm* stm) {
         }
         cout << "}";
     } else {
-        cout << stm->e->accept(this);
+        IdExp* idExp = dynamic_cast<IdExp*>(stm->e);
+        if (idExp) {
+            list<int> result = set_memoria[idExp->value];
+            if (!result.empty()) {
+                cout << "{";
+                bool first = true;
+                for (int val : result) {
+                    if (!first) cout << ",";
+                    cout << val;
+                    first = false;
+                }
+                cout << "}";
+            } else {
+                cout << stm->e->accept(this);
+            }
+        } else {
+            cout << stm->e->accept(this);
+        }
     }
     return 0;
 }
 
 int EVALVisitor::visit(AssignStm* stm) {
-    memoria[stm->id] = stm->rhs->accept(this);
+    Set* set = dynamic_cast<Set*>(stm->rhs);
+    if (set) {
+        set_memoria[stm->id] = set->acceptSet(this);
+    } else {
+        memoria[stm->id] = stm->rhs->accept(this);
+    }
     return 0;
 }
 int EVALVisitor::visit(IdExp* exp) {

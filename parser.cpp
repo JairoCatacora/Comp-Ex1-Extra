@@ -94,7 +94,26 @@ PType* Parser::parseCE() {
         return parseSE();
     }
     else {
-        return parseE();
+        Exp* exp = parseE();
+        
+        if (check(Token::UNION) || check(Token::INTERSECT) || check(Token::DIFFERENCE)) {
+            IdExp* idExp = dynamic_cast<IdExp*>(exp);
+            if (idExp) {
+                IdSet* idSet = new IdSet(idExp->value);
+                SetOp op;
+                if (match(Token::UNION)) {
+                    op = UNION_OP;
+                } else if (match(Token::INTERSECT)) {
+                    op = INTERSECT_OP;
+                } else if (match(Token::DIFFERENCE)) {
+                    op = DIFFERENCE_OP;
+                }
+                
+                Set* rightSet = parseST();
+                return new BinarySetExp(idSet, rightSet, op);
+            }
+        }
+        return exp;
     }
 }
 
@@ -193,6 +212,10 @@ Set* Parser::parseSF() {
         Set* s = parseSE();
         match(Token::RPAREN);
         return s;
+    }
+    else if (match(Token::ID))
+    {
+        return new IdSet(previous->text);
     }
     else {
         throw runtime_error("Error sintáctico");
